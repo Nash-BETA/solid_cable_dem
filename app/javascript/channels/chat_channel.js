@@ -1,15 +1,25 @@
-import consumer from "channels/consumer"
+import consumer from 'channels/consumer'
 
-consumer.subscriptions.create("ChatChannel", {
-  connected() {
-    // Called when the subscription is ready for use on the server
-  },
-
-  disconnected() {
-    // Called when the subscription has been terminated by the server
-  },
-
+const chatChannel = consumer.subscriptions.create('ChatChannel', {
   received(data) {
-    // Called when there's incoming data on the websocket for this channel
+    const messages = document.getElementById('messages')
+    const div = document.createElement('div')
+    div.textContent = data.message
+    messages.appendChild(div)
+    messages.scrollTop = messages.scrollHeight
   }
-});
+})
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('send-btn')
+  const input = document.getElementById('message-input')
+  btn.addEventListener('click', () => {
+    if (input.value.trim()) {
+      chatChannel.send({ message: input.value })
+      input.value = ''
+    }
+  })
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') btn.click()
+  })
+})
